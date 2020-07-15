@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="docker,lnmp," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="目标LNMP技术栈是Web开发中流行的技术栈之一，本文的目标是，利用docker搭建一套LNMP服务。 好，废话不多说，我们直入主题。 Docker的安装Docker CE（Community Edition）社区版本本身支持多种平台的安装，如Linux，MacOS，Windows等操作系统，此外，还支持AWS，Azure等云计算平台。 如果你使用的是Windows 10，那么你可以直接Docke">
+<meta name="keywords" content="docker,lnmp">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LNMP技术栈在Docker中的使用">
+<meta property="og:url" content="https://oobspark.github.io/2019/01/20/lnmp-stack-with-docker/index.html">
+<meta property="og:site_name" content="Oobspark">
+<meta property="og:description" content="目标LNMP技术栈是Web开发中流行的技术栈之一，本文的目标是，利用docker搭建一套LNMP服务。 好，废话不多说，我们直入主题。 Docker的安装Docker CE（Community Edition）社区版本本身支持多种平台的安装，如Linux，MacOS，Windows等操作系统，此外，还支持AWS，Azure等云计算平台。 如果你使用的是Windows 10，那么你可以直接Docke">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://oobspark.github.io/2019/01/20/lnmp-stack-with-docker/images/docker-toolbox.png">
+<meta property="og:image" content="https://oobspark.github.io/2019/01/20/lnmp-stack-with-docker/images/mariadb-status.png">
+<meta property="og:updated_time" content="2019-11-12T07:32:27.584Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LNMP技术栈在Docker中的使用">
+<meta name="twitter:description" content="目标LNMP技术栈是Web开发中流行的技术栈之一，本文的目标是，利用docker搭建一套LNMP服务。 好，废话不多说，我们直入主题。 Docker的安装Docker CE（Community Edition）社区版本本身支持多种平台的安装，如Linux，MacOS，Windows等操作系统，此外，还支持AWS，Azure等云计算平台。 如果你使用的是Windows 10，那么你可以直接Docke">
+<meta name="twitter:image" content="https://oobspark.github.io/2019/01/20/lnmp-stack-with-docker/images/docker-toolbox.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://oobspark.github.io/2019/01/20/lnmp-stack-with-docker/"/>
+
+
+
+
+
+  <title>LNMP技术栈在Docker中的使用 | Oobspark</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Oobspark</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Out Of the Box and Spark</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://oobspark.github.io/2019/01/20/lnmp-stack-with-docker/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="oobspark">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Oobspark">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">LNMP技术栈在Docker中的使用</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-01-20T10:37:16+08:00">
+                2019-01-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h3><p>LNMP技术栈是Web开发中流行的技术栈之一，本文的目标是，利用docker搭建一套LNMP服务。</p>
+<p>好，废话不多说，我们直入主题。</p>
+<h3 id="Docker的安装"><a href="#Docker的安装" class="headerlink" title="Docker的安装"></a>Docker的安装</h3><p>Docker CE（Community Edition）社区版本本身支持多种平台的安装，如Linux，MacOS，Windows等操作系统，此外，还支持AWS，Azure等云计算平台。</p>
+<p>如果你使用的是Windows 10，那么你可以直接<a href="https://hub.docker.com/editions/community/docker-ce-desktop-windows" target="_blank" rel="noopener"><code>Docker Desktop for Windows</code></a>。要使用此工具，你需要开启你Windows中的<code>Hyper-V</code>服务和<code>BIOS</code>中的<code>Virtualization</code>选项。</p>
+<p>笔者使用的是Windows 7操作系统，直接使用<a href="https://docs.docker.com/toolbox/toolbox_install_windows/" target="_blank" rel="noopener">Docker Toolbox</a>，下载并安装即可。</p>
+<p><img src="images/docker-toolbox.png" alt="docker-toolbox" title="docker-toolbox"></p>
+<h3 id="使用到的镜像"><a href="#使用到的镜像" class="headerlink" title="使用到的镜像"></a>使用到的镜像</h3><p>本文中会使用到以下三个基础镜像：</p>
+<ul>
+<li>nginx:1.15</li>
+<li>php:7.1-fpm</li>
+<li>mysql:5.7</li>
+</ul>
+<p>三个镜像都是官方提供的镜像，官方镜像保证了稳定性的同时，同时也保留了一些扩展性，使用起来比较方便。</p>
+<p>我们先把三个镜像下载到本地备用。打开<code>Docker Quickstart Terminal</code>，并执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker pull nginx:1.15</span><br><span class="line">docker pull php:7.1-fpm</span><br><span class="line">docker pull mariadb:10.3</span><br></pre></td></tr></table></figure>
+<h3 id="常规方法"><a href="#常规方法" class="headerlink" title="常规方法"></a>常规方法</h3><p>首先我们使用<code>docker</code>的基本命令来创建我们的容器。</p>
+<ul>
+<li>MariaDB</li>
+</ul>
+<p>打开<code>Docker Quickstart Terminal</code>后，执行：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd lnmp</span><br><span class="line">docker run --name mysql -p 3306:3306 \</span><br><span class="line">    -v $PWD/mysql:/var/lib/mysql -d mariadb:10.3</span><br></pre></td></tr></table></figure>
+<p>查看服务状态：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql -h192.168.99.100 -uroot -p123123 -e &quot;status&quot;</span><br></pre></td></tr></table></figure>
+<p>此处返回服务器状态信息</p>
+<p><img src="images/mariadb-status.png" alt="mariadb-status" title="mariadb-status"></p>
+<ul>
+<li>PHP-FPM</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker run --name php-fpm --link mysql:mysql -p 9000:9000 \</span><br><span class="line">    -v $PWD/html:/var/www/html:ro -d php:7.1-fpm</span><br></pre></td></tr></table></figure>
+<pre><code>--name php-fpm：
+   自定义容器名
+
+--link mysql:mysql
+   与mysql容器关联，并将mysql容器的域名指定为mysql
+
+-v $PWD/www:/var/www/html:ro
+   `$PWD/www`是宿主机的php文件目录
+   `/var/www/html`是容器内php文件目录
+   `ro`表示只读。
+</code></pre><p>官方docker中已经包含的PHP的部分基本扩展，但是很显然这并不能满足大多数的使用场景。</p>
+<p>因此，官方还提供了<code>docker-php-ext-configure</code>，<code>docker-php-ext-install</code>和<br><code>docker-php-ext-enable</code>等脚本供我们使用，可以更方便的安装我们的扩展。</p>
+<p>此外，容器还提供对<code>pecl</code>命令的支持。</p>
+<p>我们基于此安装我们常用一些扩展。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker-php-ext-install pdo pdo_mysql</span><br><span class="line">pecl install redis-4.0.1 &amp;&amp; \</span><br><span class="line">    pecl install xdebug-2.6.0 \</span><br><span class="line">    docker-php-ext-enable redis xdebug</span><br></pre></td></tr></table></figure>
+<p>当然我们也可以选择直接编译安装。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">curl -fsSL &apos;http://pecl.php.net/get/redis-4.2.0.tgz&apos; \</span><br><span class="line">    &amp;&amp; tar zxvf redis-4.2.0.tgz \</span><br><span class="line">    &amp;&amp; rm redis-4.2.0.tgz \</span><br><span class="line">    &amp;&amp; ( \</span><br><span class="line">        cd redis-4.2.0 \</span><br><span class="line">        &amp;&amp; phpize \</span><br><span class="line">        &amp;&amp; ./configure \</span><br><span class="line">        &amp;&amp; make -j &quot;$(nproc)&quot; \</span><br><span class="line">        &amp;&amp; make install \</span><br><span class="line">    ) \</span><br><span class="line">    &amp;&amp; rm -r redis-4.2.0 \</span><br><span class="line">    &amp;&amp; docker-php-ext-enable redis</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Nginx</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run --name nginx -p 80:80 --link php-fpm:php \</span><br><span class="line">    -v $PWD/default_host.conf:/etc/nginx/conf.d/default.conf:ro \</span><br><span class="line">    -v $PWD/html:/usr/share/nginx/html:ro \</span><br><span class="line">    -d nginx:1.15</span><br></pre></td></tr></table></figure>
+<pre><code>--name nginx：
+   自定义容器名
+
+--link php-fpm:php
+   与php-fpm容器关联，并将php-fpm容器的域名指定为php
+
+-v $PWD/default_host.conf:/etc/nginx/conf.d/default.conf:ro
+   替换host文件
+
+-v $PWD/html:/usr/share/nginx/html:ro \
+   替换网站根目录
+</code></pre><ul>
+<li>总结</li>
+</ul>
+<p>至此，我们依次启动了mysql，php-fpm和nginx容器（顺序很重要，因为他们有依赖关系）。打开浏览器，访问<code>http://192.168.99.100/</code>，就是见证奇迹的时刻。</p>
+<h3 id="高阶"><a href="#高阶" class="headerlink" title="高阶"></a>高阶</h3><p>以上是比较常规的一种方式，也稍显麻烦。下面介绍<code>docker-composer</code>的配置方式。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">version: &apos;3&apos;</span><br><span class="line">services:</span><br><span class="line">    mysql:</span><br><span class="line">        image: mariadb:10.3</span><br><span class="line">        volumes:</span><br><span class="line">            - mysql-data:/var/lib/mysql</span><br><span class="line">        environment:</span><br><span class="line">            TZ: &apos;Asia/Shanghai&apos;</span><br><span class="line">            MYSQL_ROOT_PASSWORD: 123123</span><br><span class="line">        command: [&apos;mysqld&apos;, &apos;--character-set-server=utf8&apos;]</span><br><span class="line">        ports:</span><br><span class="line">            - &quot;3306:3306&quot;</span><br><span class="line">        networks:</span><br><span class="line">            - backend</span><br><span class="line">    php:</span><br><span class="line">        image: &quot;mylnmp/php:v1.0&quot;</span><br><span class="line">        build:</span><br><span class="line">            context: .</span><br><span class="line">            dockerfile: Dockerfile-php</span><br><span class="line">        ports:</span><br><span class="line">            - &quot;9000:9000&quot;</span><br><span class="line">        networks:</span><br><span class="line">            - frontend</span><br><span class="line">            - backend</span><br><span class="line">        depends_on:</span><br><span class="line">            - mysql</span><br><span class="line">    nginx:</span><br><span class="line">        image: &quot;mylnmp/nginx:v1.0&quot;</span><br><span class="line">        build:</span><br><span class="line">            context: .</span><br><span class="line">            dockerfile: Dockerfile-nginx</span><br><span class="line">        ports:</span><br><span class="line">            - &quot;80:80&quot;</span><br><span class="line">        networks:</span><br><span class="line">            - frontend</span><br><span class="line">        depends_on:</span><br><span class="line">            - php</span><br><span class="line">volumes:</span><br><span class="line">    mysql-data:</span><br><span class="line"></span><br><span class="line">networks:</span><br><span class="line">    frontend:</span><br><span class="line">    backend:</span><br></pre></td></tr></table></figure>
+<p>具体可参考我的GitHub项目<a href="https://github.com/wueason/lnmp-container" target="_blank" rel="noopener"><code>lnmp-container</code></a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/docker/" rel="tag"># docker</a>
+          
+            <a href="/tags/lnmp/" rel="tag"># lnmp</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/01/numpy-bootstrap/" rel="next" title="numpy基础">
+                <i class="fa fa-chevron-left"></i> numpy基础
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/03/11/elasticsearch/" rel="prev" title="Elasticsearch基本操作">
+                Elasticsearch基本操作 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.jpg"
+               alt="oobspark" />
+          <p class="site-author-name" itemprop="name">oobspark</p>
+           
+              <p class="site-description motion-element" itemprop="description">Out Of the Box and Spark</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">48</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/wueason" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                    
+                      GitHub
+                    
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#目标"><span class="nav-number">1.</span> <span class="nav-text">目标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Docker的安装"><span class="nav-number">2.</span> <span class="nav-text">Docker的安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用到的镜像"><span class="nav-number">3.</span> <span class="nav-text">使用到的镜像</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#常规方法"><span class="nav-number">4.</span> <span class="nav-text">常规方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#高阶"><span class="nav-number">5.</span> <span class="nav-text">高阶</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2018 - 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">oobspark</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

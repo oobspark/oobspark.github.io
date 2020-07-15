@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Spark,环境搭建," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="目标： 搭建Spark环境 写出第一个Spark程序并运行。  运行环境 ubuntu 16.04 python3 Java 1.8 Spark 2.1.0 Hadoop 2.7.5  ubuntu 16.04 基于vagrant vagrant box add ubuntu/xenial https://cloud-images.ubuntu.com/xenial/current/xenial-">
+<meta name="keywords" content="Spark,环境搭建">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spark环境搭建">
+<meta property="og:url" content="https://oobspark.github.io/2018/04/04/spark-environment/index.html">
+<meta property="og:site_name" content="Oobspark">
+<meta property="og:description" content="目标： 搭建Spark环境 写出第一个Spark程序并运行。  运行环境 ubuntu 16.04 python3 Java 1.8 Spark 2.1.0 Hadoop 2.7.5  ubuntu 16.04 基于vagrant vagrant box add ubuntu/xenial https://cloud-images.ubuntu.com/xenial/current/xenial-">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-11-12T07:32:27.586Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spark环境搭建">
+<meta name="twitter:description" content="目标： 搭建Spark环境 写出第一个Spark程序并运行。  运行环境 ubuntu 16.04 python3 Java 1.8 Spark 2.1.0 Hadoop 2.7.5  ubuntu 16.04 基于vagrant vagrant box add ubuntu/xenial https://cloud-images.ubuntu.com/xenial/current/xenial-">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://oobspark.github.io/2018/04/04/spark-environment/"/>
+
+
+
+
+
+  <title>Spark环境搭建 | Oobspark</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Oobspark</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Out Of the Box and Spark</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://oobspark.github.io/2018/04/04/spark-environment/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="oobspark">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Oobspark">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Spark环境搭建</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-04T09:22:42+08:00">
+                2018-04-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="目标："><a href="#目标：" class="headerlink" title="目标："></a>目标：</h3><ul>
+<li>搭建Spark环境</li>
+<li>写出第一个Spark程序并运行。</li>
+</ul>
+<h3 id="运行环境"><a href="#运行环境" class="headerlink" title="运行环境"></a>运行环境</h3><ul>
+<li>ubuntu 16.04</li>
+<li>python3</li>
+<li>Java 1.8</li>
+<li>Spark 2.1.0</li>
+<li>Hadoop 2.7.5</li>
+</ul>
+<h3 id="ubuntu-16-04"><a href="#ubuntu-16-04" class="headerlink" title="ubuntu 16.04"></a>ubuntu 16.04</h3><ul>
+<li>基于<a href="https://www.vagrantup.com/" target="_blank" rel="noopener">vagrant</a></li>
+<li><code>vagrant box add ubuntu/xenial https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-vagrant.box</code></li>
+<li><code>vagrant init ubuntu/xenial</code></li>
+<li>增加ip地址解析<code>config.vm.network &quot;public_network&quot;, ip: &quot;192.168.100.110&quot;</code></li>
+<li>增加内存上限<code>config.vm.provider &quot;virtualbox&quot; do |vb|        vb.memory = &quot;5248&quot;        end</code></li>
+<li><code>vagrant up</code></li>
+<li><code>vagrant ssh</code></li>
+</ul>
+<h3 id="python3"><a href="#python3" class="headerlink" title="python3"></a>python3</h3><ul>
+<li><del><code>curl &quot;https://bootstrap.pypa.io/get-pip.py&quot; -o &quot;get-pip.py&quot;</code></del></li>
+<li><del><code>python3 get-pip.py</code></del></li>
+<li><del><code>sudo pip install ipython</code></del></li>
+<li><code>sudo apt install python3-pip</code></li>
+<li><code>sudo pip3 install ipython</code></li>
+<li><code>sudo pip3 install numpy</code></li>
+</ul>
+<h3 id="Java-1-8"><a href="#Java-1-8" class="headerlink" title="Java 1.8"></a>Java 1.8</h3><ul>
+<li><code>sudo apt-get update</code></li>
+<li><code>sudo apt-get install -y default-jre default-jdk</code></li>
+</ul>
+<h3 id="Hadoop-2-7-5"><a href="#Hadoop-2-7-5" class="headerlink" title="Hadoop 2.7.5"></a>Hadoop 2.7.5</h3><ul>
+<li><code>wget http://mirrors.tuna.tsinghua.edu.cn/apache/hadoop/common/hadoop-2.7.5/hadoop-2.7.5.tar.gz</code></li>
+<li><code>tar zxvf hadoop-2.7.5.tar.gz</code></li>
+<li><code>sudo mv hadoop-2.7.5 /usr/local/hadoop</code></li>
+<li><code>sudo chown vagrant /usr/local/hadoop</code></li>
+</ul>
+<h3 id="Spark-2-3-0"><a href="#Spark-2-3-0" class="headerlink" title="Spark 2.3.0"></a>Spark 2.3.0</h3><ul>
+<li><code>wget https://www.apache.org/dyn/closer.lua/spark/spark-2.3.0/spark-2.3.0-bin-without-hadoop.tgz</code></li>
+<li><code>tar zxvf spark-2.3.0-bin-without-hadoop.tgz</code></li>
+<li><code>sudo mv spark-2.3.0-bin-without-hadoop /usr/local/spark</code></li>
+<li><code>sudo chown vagrant /usr/local/spark</code></li>
+<li>在文件<code>/usr/local/spark/conf/spark-env.sh</code>文件开头增加:<code>export SPARK_DIST_CLASSPATH=$(/usr/local/hadoop/bin/hadoop classpath)</code></li>
+</ul>
+<h3 id="PATH"><a href="#PATH" class="headerlink" title="PATH"></a>PATH</h3><ul>
+<li><code>vi ~/.bashrc</code>，添加以下代码  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">export PYSPARK_DRIVER_PYTHON=ipython</span><br><span class="line">export JAVA_HOME=/usr/lib/jvm/default-java</span><br><span class="line">export HADOOP_HOME=/usr/local/hadoop</span><br><span class="line">export SPARK_HOME=/usr/local/spark</span><br><span class="line">export HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_HOME/lib/native</span><br><span class="line">export PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.6-src.zip:$PYTHONPATH</span><br><span class="line">export PYSPARK_PYTHON=python3</span><br><span class="line">export PATH=$HADOOP_HOME/bin:$SPARK_HOME/bin:$HADOOP_HOME/sbin:$PATH</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="Spark-初体验"><a href="#Spark-初体验" class="headerlink" title="Spark 初体验"></a>Spark 初体验</h3><ul>
+<li><code>cd /usr/local/spark</code></li>
+<li>执行<code>./bin/pyspark</code>，进入Spark shell。没有报错，表明安装正确。</li>
+<li>运行Spark自带的例子。<code>./bin/spark-submit examples/src/main/python/pi.py 10</code></li>
+</ul>
+<h3 id="第一个Spark程序"><a href="#第一个Spark程序" class="headerlink" title="第一个Spark程序"></a>第一个Spark程序</h3><ul>
+<li><p><code>vi /usr/local/spark/code/wordCount.py</code></p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pyspark <span class="keyword">import</span> SparkContext</span><br><span class="line">sc = SparkContext( <span class="string">'local'</span>, <span class="string">'test'</span>)</span><br><span class="line">textFile = sc.textFile(<span class="string">"file:///usr/local/spark/README.md"</span>)</span><br><span class="line">wordCount = textFile.flatMap(<span class="keyword">lambda</span> line: line.split(<span class="string">" "</span>)).map(<span class="keyword">lambda</span> word: (word,<span class="number">1</span>)).reduceByKey(<span class="keyword">lambda</span> a, b : a + b)</span><br><span class="line">wordCount.foreach(<span class="keyword">print</span>)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><strong>至此，本文也到了该完结的时候，在敲下这个命令之后：<code>python3 code/wordCount.py</code></strong></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Spark/" rel="tag"># Spark</a>
+          
+            <a href="/tags/环境搭建/" rel="tag"># 环境搭建</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/02/intro/" rel="next" title="Spark由浅入深">
+                <i class="fa fa-chevron-left"></i> Spark由浅入深
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/06/spark-components/" rel="prev" title="Spark组件">
+                Spark组件 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.jpg"
+               alt="oobspark" />
+          <p class="site-author-name" itemprop="name">oobspark</p>
+           
+              <p class="site-description motion-element" itemprop="description">Out Of the Box and Spark</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">48</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/wueason" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                    
+                      GitHub
+                    
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#目标："><span class="nav-number">1.</span> <span class="nav-text">目标：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#运行环境"><span class="nav-number">2.</span> <span class="nav-text">运行环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ubuntu-16-04"><span class="nav-number">3.</span> <span class="nav-text">ubuntu 16.04</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#python3"><span class="nav-number">4.</span> <span class="nav-text">python3</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Java-1-8"><span class="nav-number">5.</span> <span class="nav-text">Java 1.8</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hadoop-2-7-5"><span class="nav-number">6.</span> <span class="nav-text">Hadoop 2.7.5</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Spark-2-3-0"><span class="nav-number">7.</span> <span class="nav-text">Spark 2.3.0</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PATH"><span class="nav-number">8.</span> <span class="nav-text">PATH</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Spark-初体验"><span class="nav-number">9.</span> <span class="nav-text">Spark 初体验</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第一个Spark程序"><span class="nav-number">10.</span> <span class="nav-text">第一个Spark程序</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2018 - 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">oobspark</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

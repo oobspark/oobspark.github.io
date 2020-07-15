@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hadoop,Hbase," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="简介HBase – Hadoop Database，是一个分布式的、面向列的开源数据库，该技术来源于 Fay Chang 所撰写的Google论文“Bigtable：一个结构化数据的分布式存储系统”。就像Bigtable利用了Google文件系统（File System）所提供的分布式数据存储一样，HBase在Hadoop之上提供了类似于Bigtable的能力。HBase是Apache的Hadoo">
+<meta name="keywords" content="Hadoop,Hbase">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式数据库HBase">
+<meta property="og:url" content="https://oobspark.github.io/2018/04/23/hbase-installation/index.html">
+<meta property="og:site_name" content="Oobspark">
+<meta property="og:description" content="简介HBase – Hadoop Database，是一个分布式的、面向列的开源数据库，该技术来源于 Fay Chang 所撰写的Google论文“Bigtable：一个结构化数据的分布式存储系统”。就像Bigtable利用了Google文件系统（File System）所提供的分布式数据存储一样，HBase在Hadoop之上提供了类似于Bigtable的能力。HBase是Apache的Hadoo">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-11-12T07:32:27.582Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="分布式数据库HBase">
+<meta name="twitter:description" content="简介HBase – Hadoop Database，是一个分布式的、面向列的开源数据库，该技术来源于 Fay Chang 所撰写的Google论文“Bigtable：一个结构化数据的分布式存储系统”。就像Bigtable利用了Google文件系统（File System）所提供的分布式数据存储一样，HBase在Hadoop之上提供了类似于Bigtable的能力。HBase是Apache的Hadoo">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://oobspark.github.io/2018/04/23/hbase-installation/"/>
+
+
+
+
+
+  <title>分布式数据库HBase | Oobspark</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Oobspark</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Out Of the Box and Spark</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://oobspark.github.io/2018/04/23/hbase-installation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="oobspark">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Oobspark">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">分布式数据库HBase</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-23T15:11:43+08:00">
+                2018-04-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>HBase – Hadoop Database，是一个分布式的、面向列的开源数据库，该技术来源于 Fay Chang 所撰写的Google论文“Bigtable：一个结构化数据的分布式存储系统”。就像Bigtable利用了Google文件系统（File System）所提供的分布式数据存储一样，HBase在Hadoop之上提供了类似于Bigtable的能力。HBase是Apache的Hadoop项目的子项目。</p>
+<p>HBase不同于一般的关系数据库，它是一个适合于非结构化数据存储的数据库。另一个不同的是HBase基于列的而不是基于行的模式。</p>
+<p>HBase是一个高可靠性、高性能、面向列、可伸缩的分布式存储系统，利用HBase技术可在廉价PC Server上搭建起大规模结构化存储集群。</p>
+<h3 id="环境依赖"><a href="#环境依赖" class="headerlink" title="环境依赖"></a>环境依赖</h3><ul>
+<li>Java，具体可参考<a href="http://hbase.apache.org/book.html#java" target="_blank" rel="noopener">推荐版本</a></li>
+<li>ssh，sshd服务</li>
+</ul>
+<h3 id="Java-1-8"><a href="#Java-1-8" class="headerlink" title="Java 1.8"></a>Java 1.8</h3><ul>
+<li><code>sudo apt-get update</code></li>
+<li><code>sudo apt-get install -y default-jre default-jdk</code></li>
+</ul>
+<h3 id="HBase-1-3-2"><a href="#HBase-1-3-2" class="headerlink" title="HBase 1.3.2"></a>HBase 1.3.2</h3><ul>
+<li><code>wget http://mirrors.hust.edu.cn/apache/hbase/1.3.2/hbase-1.3.2-bin.tar.gz</code></li>
+<li><code>tar zxvf hbase-1.3.2-bin.tar.gz</code></li>
+<li><code>sudo mv hbase-1.3.2 /usr/local/hadoop/hbase</code></li>
+<li><code>sudo chown vagrant:vagrant /usr/local/hadoop</code>，注意此处，必须为hbase上级目录设置权限</li>
+</ul>
+<h3 id="PATH"><a href="#PATH" class="headerlink" title="PATH"></a>PATH</h3><ul>
+<li><code>vi ~/.bashrc</code>，添加以下代码  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">export JAVA_HOME=/usr/lib/jvm/default-java</span><br><span class="line">export HBASE_HOME=/usr/local/hadoop/hbase</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="单机模式安装"><a href="#单机模式安装" class="headerlink" title="单机模式安装"></a>单机模式安装</h3><ul>
+<li><p>配置文件</p>
+<ul>
+<li><p>hbase-site.xml：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;configuration&gt;</span><br><span class="line">  &lt;property&gt;</span><br><span class="line">    &lt;name&gt;hbase.rootdir&lt;/name&gt;</span><br><span class="line">    &lt;value&gt;file:///opt/data/hbase&lt;/value&gt;</span><br><span class="line">  &lt;/property&gt;</span><br><span class="line">  &lt;property&gt;</span><br><span class="line">    &lt;name&gt;hbase.zookeeper.property.dataDir&lt;/name&gt;</span><br><span class="line">    &lt;value&gt;/opt/data/zookeeper&lt;/value&gt;</span><br><span class="line">  &lt;/property&gt;</span><br><span class="line">&lt;/configuration&gt;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>conf/hbase-env.sh文件中，修改：<br><code>export JAVA_HOME=/usr/lib/jvm/default-java</code><br><code>export HBASE_MANAGES_ZK=true</code>，使用hbase自带zookeeper</p>
+</li>
+</ul>
+</li>
+<li><p>运行：</p>
+<ol>
+<li><p>启动服务<br><code>bin/start-hbase.sh</code></p>
+</li>
+<li><p>停止服务<br><code>bin/stop-hbase.sh</code></p>
+</li>
+</ol>
+</li>
+</ul>
+<h3 id="伪分布式安装"><a href="#伪分布式安装" class="headerlink" title="伪分布式安装"></a>伪分布式安装</h3><ul>
+<li><p>配置文件</p>
+<ul>
+<li><p>hbase-site.xml：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&lt;configuration&gt;</span><br><span class="line">  	&lt;property&gt;</span><br><span class="line">    	&lt;name&gt;hbase.rootdir&lt;/name&gt;</span><br><span class="line">    	&lt;value&gt;hdfs://localhost:8020/hbase&lt;/value&gt;</span><br><span class="line">  	&lt;/property&gt;</span><br><span class="line">  	&lt;property&gt;</span><br><span class="line">    	&lt;name&gt;hbase.zookeeper.property.dataDir&lt;/name&gt;</span><br><span class="line">    	&lt;value&gt;/opt/data/zookeeper&lt;/value&gt;</span><br><span class="line">  	&lt;/property&gt;</span><br><span class="line">  	&lt;property&gt;</span><br><span class="line">	  &lt;name&gt;hbase.cluster.distributed&lt;/name&gt;</span><br><span class="line">	  &lt;value&gt;true&lt;/value&gt;</span><br><span class="line">	&lt;/property&gt;</span><br><span class="line">&lt;/configuration&gt;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>conf/hbase-env.sh文件中，修改：<br><code>export JAVA_HOME=/usr/lib/jvm/default-java</code><br><code>export  HBASE_MANAGES_ZK=true</code>，使用hbase自带zookeeper</p>
+</li>
+</ul>
+</li>
+<li><p>运行：</p>
+<ol>
+<li><p>启动服务<br><code>bin/start-hbase.sh</code></p>
+</li>
+<li><p>master副本<br><code>bin/local-master-backup.sh start 2 3 5</code></p>
+</li>
+<li><p>region server副本<br><code>bin/local-regionservers.sh start 2 3</code></p>
+</li>
+<li><p>停止服务<br><code>bin/stop-hbase.sh</code><br><code>cat /tmp/hbase-vagrant-1-master.pid |xargs kill -9</code><br><code>bin/local-regionservers.sh stop 3</code></p>
+</li>
+</ol>
+</li>
+</ul>
+<h3 id="HBase基本操作"><a href="#HBase基本操作" class="headerlink" title="HBase基本操作"></a>HBase基本操作</h3><ol>
+<li><p>连接到HBase</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ ./bin/hbase shell</span><br><span class="line">hbase(main):001:0&gt;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>显示帮助，<code>help</code></p>
+</li>
+<li><p>建表</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hbase(main):001:0&gt; create &apos;test&apos;, &apos;cf&apos;</span><br><span class="line">0 row(s) in 0.4170 seconds</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查看表信息</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">hbase(main):002:0&gt; list &apos;test&apos;</span><br><span class="line">TABLE</span><br><span class="line">test</span><br><span class="line">1 row(s) in 0.0180 seconds</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>写数据</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">hbase(main):003:0&gt; put &apos;test&apos;, &apos;row1&apos;, &apos;cf:a&apos;, &apos;value1&apos;</span><br><span class="line">0 row(s) in 0.0850 seconds</span><br><span class="line"></span><br><span class="line">hbase(main):004:0&gt; put &apos;test&apos;, &apos;row2&apos;, &apos;cf:b&apos;, &apos;value2&apos;</span><br><span class="line">0 row(s) in 0.0110 seconds</span><br><span class="line"></span><br><span class="line">hbase(main):005:0&gt; put &apos;test&apos;, &apos;row3&apos;, &apos;cf:c&apos;, &apos;value3&apos;</span><br><span class="line">0 row(s) in 0.0100 seconds</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>获取数据</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">hbase(main):006:0&gt; scan &apos;test&apos;</span><br><span class="line">ROW                                      COLUMN+CELL</span><br><span class="line"> row1                                    column=cf:a, timestamp=1421762485768, value=value1</span><br><span class="line"> row2                                    column=cf:b, timestamp=1421762491785, value=value2</span><br><span class="line"> row3                                    column=cf:c, timestamp=1421762496210, value=value3</span><br><span class="line">3 row(s) in 0.0230 seconds</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>获取单行数据</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">hbase(main):007:0&gt; get &apos;test&apos;, &apos;row1&apos;</span><br><span class="line">COLUMN                                   CELL</span><br><span class="line"> cf:a                                    timestamp=1421762485768, value=value1</span><br><span class="line">1 row(s) in 0.0350 seconds</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>禁用表</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">hbase(main):008:0&gt; disable &apos;test&apos;</span><br><span class="line">0 row(s) in 1.1820 seconds</span><br><span class="line"></span><br><span class="line">hbase(main):009:0&gt; enable &apos;test&apos;</span><br><span class="line">0 row(s) in 0.1770 seconds</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>删除表</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hbase(main):010:0&gt; drop &apos;test&apos;</span><br><span class="line">0 row(s) in 0.1370 seconds</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>退出</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hbase(main):011:0&gt; exit</span><br></pre></td></tr></table></figure></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Hadoop/" rel="tag"># Hadoop</a>
+          
+            <a href="/tags/Hbase/" rel="tag"># Hbase</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/21/hadoop-installation/" rel="next" title="Hadoop安装">
+                <i class="fa fa-chevron-left"></i> Hadoop安装
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/25/hive-installation/" rel="prev" title="分布式数据仓库Hive">
+                分布式数据仓库Hive <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.jpg"
+               alt="oobspark" />
+          <p class="site-author-name" itemprop="name">oobspark</p>
+           
+              <p class="site-description motion-element" itemprop="description">Out Of the Box and Spark</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">48</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/wueason" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                    
+                      GitHub
+                    
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#环境依赖"><span class="nav-number">2.</span> <span class="nav-text">环境依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Java-1-8"><span class="nav-number">3.</span> <span class="nav-text">Java 1.8</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HBase-1-3-2"><span class="nav-number">4.</span> <span class="nav-text">HBase 1.3.2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PATH"><span class="nav-number">5.</span> <span class="nav-text">PATH</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#单机模式安装"><span class="nav-number">6.</span> <span class="nav-text">单机模式安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#伪分布式安装"><span class="nav-number">7.</span> <span class="nav-text">伪分布式安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HBase基本操作"><span class="nav-number">8.</span> <span class="nav-text">HBase基本操作</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2018 - 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">oobspark</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="工作流,Pipelines," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="ML工作流（Pipelines）中的一些概念 DataFrame：使用Spark SQL中的DataFrame作为数据集，它可以容纳各种数据类型。 DataFrame中的列可以是存储的文本，特征向量，真实标签和预测标签等。  Transformer：转换器，是一种可以将一个DataFrame转换为另一个DataFrame的算法。比如一个模型就是一个Transformer。  Estimator：评">
+<meta name="keywords" content="工作流,Pipelines">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ML工作流（Pipelines）">
+<meta property="og:url" content="https://oobspark.github.io/2018/04/12/ML-Pipelines/index.html">
+<meta property="og:site_name" content="Oobspark">
+<meta property="og:description" content="ML工作流（Pipelines）中的一些概念 DataFrame：使用Spark SQL中的DataFrame作为数据集，它可以容纳各种数据类型。 DataFrame中的列可以是存储的文本，特征向量，真实标签和预测标签等。  Transformer：转换器，是一种可以将一个DataFrame转换为另一个DataFrame的算法。比如一个模型就是一个Transformer。  Estimator：评">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://oobspark.github.io/2018/04/12/ML-Pipelines/images/ML-Pipeline.png">
+<meta property="og:image" content="https://oobspark.github.io/2018/04/12/ML-Pipelines/images/ML-PipelineModel.png">
+<meta property="og:updated_time" content="2019-11-12T07:32:27.579Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ML工作流（Pipelines）">
+<meta name="twitter:description" content="ML工作流（Pipelines）中的一些概念 DataFrame：使用Spark SQL中的DataFrame作为数据集，它可以容纳各种数据类型。 DataFrame中的列可以是存储的文本，特征向量，真实标签和预测标签等。  Transformer：转换器，是一种可以将一个DataFrame转换为另一个DataFrame的算法。比如一个模型就是一个Transformer。  Estimator：评">
+<meta name="twitter:image" content="https://oobspark.github.io/2018/04/12/ML-Pipelines/images/ML-Pipeline.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://oobspark.github.io/2018/04/12/ML-Pipelines/"/>
+
+
+
+
+
+  <title>ML工作流（Pipelines） | Oobspark</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Oobspark</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Out Of the Box and Spark</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://oobspark.github.io/2018/04/12/ML-Pipelines/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="oobspark">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Oobspark">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ML工作流（Pipelines）</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-12T15:28:47+08:00">
+                2018-04-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="ML工作流（Pipelines）中的一些概念"><a href="#ML工作流（Pipelines）中的一些概念" class="headerlink" title="ML工作流（Pipelines）中的一些概念"></a>ML工作流（Pipelines）中的一些概念</h3><ul>
+<li><p>DataFrame：使用Spark SQL中的DataFrame作为数据集，它可以容纳各种数据类型。 DataFrame中的列可以是存储的文本，特征向量，真实标签和预测标签等。</p>
+</li>
+<li><p>Transformer：转换器，是一种可以将一个DataFrame转换为另一个DataFrame的算法。比如一个模型就是一个Transformer。</p>
+</li>
+<li><p>Estimator：评估器，基于算法实现了一个<code>fit()</code>方法进行<code>拟合</code>，输入一个DataFrame，产生一个Transformer。</p>
+</li>
+<li><p>PipeLine：管道将多个工作流阶段（转换器和估计器）连接在一起，形成机器学习的工作流。</p>
+</li>
+<li><p>Parameter：用来设置所有转换器和估计器的参数。</p>
+</li>
+</ul>
+<h3 id="Pipelines如何运转"><a href="#Pipelines如何运转" class="headerlink" title="Pipelines如何运转"></a>Pipelines如何运转</h3><p>一个工作流被指定为一系列的阶段，每个阶段都是Transformer或Estimator。这些阶段按顺序运行，输入的DataFrame在通过每个阶段时会进行转换。对于Transformer阶段，会在DataFrame上调用<code>transform()</code>方法。对于Estimator阶段，调用<code>fit()</code>方法来拟合生成Transformer（它将成为PipelineModel或拟合管道的一部分），并在DataFrame上调用Transformer的transform()方法。</p>
+<p><img src="images/ML-Pipeline.png" alt="流水线" title="流水线"></p>
+<p>上图中，顶行表示具有三个阶段的管道。前两个（Tokenizer和HashingTF）是Transformers（蓝色），第三个（LogisticRegression）是Estimator（红色）。底行表示流经管道的数据，其中圆柱表示DataFrames。在原始DataFrame上调用<code>Pipeline.fit()</code>方法拟合，它具有原始的文本和标签。<code>Tokenizer.transform()</code>方法将原始文本拆分为单词，并向DataFrame添加一个带有单词的新列。 <code>HashingTF.transform()</code>方法将字列转换为特征向量，向这些向量添加一个新列到DataFrame。然后，由于LogisticRegression一个Estimator，Pipeline首先调用<code>LogisticRegression.fit()</code>拟合产生一个LogisticRegressionModel。如果管道有更多的Estimator，则在将DataFrame传递到下一个阶段之前，会先在DataFrame上调用LogisticRegressionModel的<code>transform()</code>方法。</p>
+<p>PipeLine本身也是一个Estimator。因而，在工作流的<code>fit()</code>方法运行之后，它产生了一个PipelineModel，它也是一个Transformer。这个管道模型将在测试数据的时候使用。下图展示了这种用法。</p>
+<p><img src="images/ML-PipelineModel.png" alt="流水线模型" title="流水线模型"></p>
+<p>在上图中，PipelineModel具有与原始Pipeline相同的阶段数，但是原始Pipeline中的所有估计器Estimators都变为变换器Transformers。当在测试数据集上调用PipelineModel的<code>transform()</code>方法时，数据按顺序通过拟合的管道。每个阶段的transform()方法更新数据集并将其传递到下一个阶段。Pipelines和PipelineModels有助于确保训练数据集和测试数据集通过相同的特征处理步骤。</p>
+<h3 id="理解Estimator，Transformer和Param"><a href="#理解Estimator，Transformer和Param" class="headerlink" title="理解Estimator，Transformer和Param"></a>理解Estimator，Transformer和Param</h3><p>相关API ：<a href="http://spark.apache.org/docs/latest/api/python/pyspark.ml.html#pyspark.ml.Estimator" target="_blank" rel="noopener"><code>Estimator</code></a>，<a href="http://spark.apache.org/docs/latest/api/python/pyspark.ml.html#pyspark.ml.Transformer" target="_blank" rel="noopener"><code>Transformer</code></a>，<a href="http://spark.apache.org/docs/latest/api/python/pyspark.ml.html#pyspark.ml.param.Params" target="_blank" rel="noopener"><code>Params</code></a></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pyspark.ml.linalg <span class="keyword">import</span> Vectors</span><br><span class="line"><span class="keyword">from</span> pyspark.ml.classification <span class="keyword">import</span> LogisticRegression</span><br><span class="line"></span><br><span class="line">spark = SparkSession.builder.master(<span class="string">"local"</span>).appName(<span class="string">"Estimator-Transformer-Param"</span>).getOrCreate()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 准备训练数据集(label, features)元组</span></span><br><span class="line">training = spark.createDataFrame([</span><br><span class="line">    (<span class="number">1.0</span>, Vectors.dense([<span class="number">0.0</span>, <span class="number">1.1</span>, <span class="number">0.1</span>])),</span><br><span class="line">    (<span class="number">0.0</span>, Vectors.dense([<span class="number">2.0</span>, <span class="number">1.0</span>, <span class="number">-1.0</span>])),</span><br><span class="line">    (<span class="number">0.0</span>, Vectors.dense([<span class="number">2.0</span>, <span class="number">1.3</span>, <span class="number">1.0</span>])),</span><br><span class="line">    (<span class="number">1.0</span>, Vectors.dense([<span class="number">0.0</span>, <span class="number">1.2</span>, <span class="number">-0.5</span>]))], [<span class="string">"label"</span>, <span class="string">"features"</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建一个LogisticRegression示例，也就是Estimator</span></span><br><span class="line">lr = LogisticRegression(maxIter=<span class="number">10</span>, regParam=<span class="number">0.01</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 打印出所以的参数和默认值信息</span></span><br><span class="line">print(<span class="string">"LogisticRegression parameters:\n"</span> + lr.explainParams() + <span class="string">"\n"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 用训练数据集训练模型，这一步骤会使用到lr中的parameters</span></span><br><span class="line">model1 = lr.fit(training)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 现在，model1成为了一个Model（Estimator产生的transformer）</span></span><br><span class="line"><span class="comment"># 我们查看一下拟合过程所用到的parameters</span></span><br><span class="line">print(<span class="string">"Model 1 was fit using parameters: "</span>)</span><br><span class="line">print(model1.extractParamMap())</span><br><span class="line"></span><br><span class="line"><span class="comment"># 修改参数</span></span><br><span class="line">paramMap = &#123;lr.maxIter: <span class="number">20</span>&#125;</span><br><span class="line">paramMap[lr.maxIter] = <span class="number">30</span></span><br><span class="line">paramMap.update(&#123;lr.regParam: <span class="number">0.1</span>, lr.threshold: <span class="number">0.55</span>&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 合并参数</span></span><br><span class="line">paramMap2 = &#123;lr.probabilityCol: <span class="string">"myProbability"</span>&#125;  <span class="comment"># 修改输出列名</span></span><br><span class="line">paramMapCombined = paramMap.copy()</span><br><span class="line">paramMapCombined.update(paramMap2)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 现在基于新的参数进行拟合</span></span><br><span class="line">model2 = lr.fit(training, paramMapCombined)</span><br><span class="line">print(<span class="string">"Model 2 was fit using parameters: "</span>)</span><br><span class="line">print(model2.extractParamMap())</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试数据集</span></span><br><span class="line">test = spark.createDataFrame([</span><br><span class="line">    (<span class="number">1.0</span>, Vectors.dense([<span class="number">-1.0</span>, <span class="number">1.5</span>, <span class="number">1.3</span>])),</span><br><span class="line">    (<span class="number">0.0</span>, Vectors.dense([<span class="number">3.0</span>, <span class="number">2.0</span>, <span class="number">-0.1</span>])),</span><br><span class="line">    (<span class="number">1.0</span>, Vectors.dense([<span class="number">0.0</span>, <span class="number">2.2</span>, <span class="number">-1.5</span>]))], [<span class="string">"label"</span>, <span class="string">"features"</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用Transformer.transform()对测试数据进行预测</span></span><br><span class="line"><span class="comment"># LogisticRegression.transform只会使用'features'列，myProbability列既是probability列，之前我们做过更改</span></span><br><span class="line">prediction = model2.transform(test)</span><br><span class="line">result = prediction.select(<span class="string">"features"</span>, <span class="string">"label"</span>, <span class="string">"myProbability"</span>, <span class="string">"prediction"</span>).collect()</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> row <span class="keyword">in</span> result:</span><br><span class="line">    print(<span class="string">"features=%s, label=%s -&gt; prob=%s, prediction=%s"</span> % </span><br><span class="line">    (row.features, row.label, row.myProbability, row.prediction))</span><br></pre></td></tr></table></figure>
+<p>可参考<a href="https://github.com/apache/spark/tree/v2.3.0/examples/src/main/python/ml/estimator_transformer_param_example.py" target="_blank" rel="noopener"><code>examples/src/main/python/ml/estimator_transformer_param_example.py</code></a></p>
+<h3 id="Pipeline"><a href="#Pipeline" class="headerlink" title="Pipeline"></a>Pipeline</h3><p>相关API ：<a href="http://spark.apache.org/docs/latest/api/python/pyspark.ml.html#pyspark.ml.Pipeline" target="_blank" rel="noopener"><code>Pipeline</code></a></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pyspark.ml <span class="keyword">import</span> Pipeline</span><br><span class="line"><span class="keyword">from</span> pyspark.ml.classification <span class="keyword">import</span> LogisticRegression</span><br><span class="line"><span class="keyword">from</span> pyspark.ml.feature <span class="keyword">import</span> HashingTF, Tokenizer</span><br><span class="line"></span><br><span class="line"><span class="comment"># 训练数据集(id, text, label)元组.</span></span><br><span class="line">training = spark.createDataFrame([</span><br><span class="line">    (<span class="number">0</span>, <span class="string">"a b c d e spark"</span>, <span class="number">1.0</span>),</span><br><span class="line">    (<span class="number">1</span>, <span class="string">"b d"</span>, <span class="number">0.0</span>),</span><br><span class="line">    (<span class="number">2</span>, <span class="string">"spark f g h"</span>, <span class="number">1.0</span>),</span><br><span class="line">    (<span class="number">3</span>, <span class="string">"hadoop mapreduce"</span>, <span class="number">0.0</span>)</span><br><span class="line">], [<span class="string">"id"</span>, <span class="string">"text"</span>, <span class="string">"label"</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置pipeline，连接tokenizer，hashingTF和lr</span></span><br><span class="line">tokenizer = Tokenizer(inputCol=<span class="string">"text"</span>, outputCol=<span class="string">"words"</span>)</span><br><span class="line">hashingTF = HashingTF(inputCol=tokenizer.getOutputCol(), outputCol=<span class="string">"features"</span>)</span><br><span class="line">lr = LogisticRegression(maxIter=<span class="number">10</span>, regParam=<span class="number">0.001</span>)</span><br><span class="line">pipeline = Pipeline(stages=[tokenizer, hashingTF, lr])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 拟合</span></span><br><span class="line">model = pipeline.fit(training)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试数据集(id, text)元组</span></span><br><span class="line">test = spark.createDataFrame([</span><br><span class="line">    (<span class="number">4</span>, <span class="string">"spark i j k"</span>),</span><br><span class="line">    (<span class="number">5</span>, <span class="string">"l m n"</span>),</span><br><span class="line">    (<span class="number">6</span>, <span class="string">"spark hadoop spark"</span>),</span><br><span class="line">    (<span class="number">7</span>, <span class="string">"apache hadoop"</span>)</span><br><span class="line">], [<span class="string">"id"</span>, <span class="string">"text"</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 预测结果</span></span><br><span class="line">prediction = model.transform(test)</span><br><span class="line">selected = prediction.select(<span class="string">"id"</span>, <span class="string">"text"</span>, <span class="string">"probability"</span>, <span class="string">"prediction"</span>)</span><br><span class="line"><span class="keyword">for</span> row <span class="keyword">in</span> selected.collect():</span><br><span class="line">    rid, text, prob, prediction = row</span><br><span class="line">    print(<span class="string">"(%d, %s) --&gt; prob=%s, prediction=%f"</span> % (rid, text, str(prob), prediction))</span><br></pre></td></tr></table></figure>
+<p>可参考<a href="https://github.com/apache/spark/tree/v2.3.0/examples/src/main/python/ml/pipeline_example.py" target="_blank" rel="noopener"><code>examples/src/main/python/ml/pipeline_example.py</code></a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/工作流/" rel="tag"># 工作流</a>
+          
+            <a href="/tags/Pipelines/" rel="tag"># Pipelines</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/09/Resilient-Distributed-Datasets/" rel="next" title="弹性分布式数据集-RDD">
+                <i class="fa fa-chevron-left"></i> 弹性分布式数据集-RDD
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/21/hadoop-installation/" rel="prev" title="Hadoop安装">
+                Hadoop安装 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.jpg"
+               alt="oobspark" />
+          <p class="site-author-name" itemprop="name">oobspark</p>
+           
+              <p class="site-description motion-element" itemprop="description">Out Of the Box and Spark</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">48</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/wueason" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                    
+                      GitHub
+                    
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#ML工作流（Pipelines）中的一些概念"><span class="nav-number">1.</span> <span class="nav-text">ML工作流（Pipelines）中的一些概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Pipelines如何运转"><span class="nav-number">2.</span> <span class="nav-text">Pipelines如何运转</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#理解Estimator，Transformer和Param"><span class="nav-number">3.</span> <span class="nav-text">理解Estimator，Transformer和Param</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Pipeline"><span class="nav-number">4.</span> <span class="nav-text">Pipeline</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2018 - 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">oobspark</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
