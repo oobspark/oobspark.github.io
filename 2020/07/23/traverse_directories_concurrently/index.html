@@ -78,7 +78,7 @@
 <link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="MySQL,事务,事务隔离级别," />
+  <meta name="keywords" content="golang,并发,遍历目录," />
 
 
 
@@ -94,18 +94,18 @@
 
 
 
-<meta name="description" content="事务的基本要素（ACID） Atomicity（原子性）：一个事务必须被视为一个不可分割的最小工作单元，整个事务中的所有操作要么全部提交成功，要么全部失败回滚，对于一个事务来说，不可能只执行其中的一部分操作，这就是事务的原子性。  Consistency（一致性）：数据库总是从一个一致性状态转换到另一个一致状态。  Isolation（隔离性）：通常来说，一个事务所做的修改在最终提交以前，对其他事">
-<meta name="keywords" content="MySQL,事务,事务隔离级别">
+<meta name="description" content="Talk is cheap, show you the code为每一个 walkDir 的调用创建一个新的 goroutine。它使用 sync.WaitGroup 来为当前存活的 walkDir 调用计数，一个 goroutine 在计数器减为 0 的时候关闭 fileSizes 通道。 12345678910111213141516171819202122232425262728293031">
+<meta name="keywords" content="golang,并发,遍历目录">
 <meta property="og:type" content="article">
-<meta property="og:title" content="MySQL事务隔离级别">
-<meta property="og:url" content="https://oobspark.github.io/2018/05/21/mysql-transaction-isolation-level/index.html">
+<meta property="og:title" content="并发遍历目录">
+<meta property="og:url" content="https://oobspark.github.io/2020/07/23/traverse_directories_concurrently/index.html">
 <meta property="og:site_name" content="Oobspark">
-<meta property="og:description" content="事务的基本要素（ACID） Atomicity（原子性）：一个事务必须被视为一个不可分割的最小工作单元，整个事务中的所有操作要么全部提交成功，要么全部失败回滚，对于一个事务来说，不可能只执行其中的一部分操作，这就是事务的原子性。  Consistency（一致性）：数据库总是从一个一致性状态转换到另一个一致状态。  Isolation（隔离性）：通常来说，一个事务所做的修改在最终提交以前，对其他事">
+<meta property="og:description" content="Talk is cheap, show you the code为每一个 walkDir 的调用创建一个新的 goroutine。它使用 sync.WaitGroup 来为当前存活的 walkDir 调用计数，一个 goroutine 在计数器减为 0 的时候关闭 fileSizes 通道。 12345678910111213141516171819202122232425262728293031">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-11-12T07:32:27.584Z">
+<meta property="og:updated_time" content="2020-07-23T09:57:06.677Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="MySQL事务隔离级别">
-<meta name="twitter:description" content="事务的基本要素（ACID） Atomicity（原子性）：一个事务必须被视为一个不可分割的最小工作单元，整个事务中的所有操作要么全部提交成功，要么全部失败回滚，对于一个事务来说，不可能只执行其中的一部分操作，这就是事务的原子性。  Consistency（一致性）：数据库总是从一个一致性状态转换到另一个一致状态。  Isolation（隔离性）：通常来说，一个事务所做的修改在最终提交以前，对其他事">
+<meta name="twitter:title" content="并发遍历目录">
+<meta name="twitter:description" content="Talk is cheap, show you the code为每一个 walkDir 的调用创建一个新的 goroutine。它使用 sync.WaitGroup 来为当前存活的 walkDir 调用计数，一个 goroutine 在计数器减为 0 的时候关闭 fileSizes 通道。 12345678910111213141516171819202122232425262728293031">
 
 
 
@@ -134,13 +134,13 @@
 
 
 
-  <link rel="canonical" href="https://oobspark.github.io/2018/05/21/mysql-transaction-isolation-level/"/>
+  <link rel="canonical" href="https://oobspark.github.io/2020/07/23/traverse_directories_concurrently/"/>
 
 
 
 
 
-  <title>MySQL事务隔离级别 | Oobspark</title>
+  <title>并发遍历目录 | Oobspark</title>
   
 
 
@@ -269,7 +269,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://oobspark.github.io/2018/05/21/mysql-transaction-isolation-level/">
+    <link itemprop="mainEntityOfPage" href="https://oobspark.github.io/2020/07/23/traverse_directories_concurrently/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="oobspark">
@@ -286,7 +286,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">MySQL事务隔离级别</h1>
+          <h1 class="post-title" itemprop="name headline">并发遍历目录</h1>
         
 
         <div class="post-meta">
@@ -298,8 +298,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-21T14:41:12+08:00">
-                2018-05-21
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-07-23T15:12:31+08:00">
+                2020-07-23
               </time>
             
 
@@ -336,73 +336,8 @@
       
 
       
-        <h2 id="事务的基本要素（ACID）"><a href="#事务的基本要素（ACID）" class="headerlink" title="事务的基本要素（ACID）"></a>事务的基本要素（ACID）</h2><ol>
-<li><p>Atomicity（原子性）：一个事务必须被视为一个不可分割的最小工作单元，整个事务中的所有操作要么全部提交成功，要么全部失败回滚，对于一个事务来说，不可能只执行其中的一部分操作，这就是事务的原子性。</p>
-</li>
-<li><p>Consistency（一致性）：数据库总是从一个一致性状态转换到另一个一致状态。</p>
-</li>
-<li><p>Isolation（隔离性）：通常来说，一个事务所做的修改在最终提交以前，对其他事务是不可见的。注意这里的“通常来说”，后面的事务隔离级级别会说到。</p>
-</li>
-<li><p>Durability（持久性）：一旦事务提交，则其所做的修改就会永久保存到数据库中。此时即使系统崩溃，修改的数据也不会丢失。（持久性的安全性与刷新日志级别也存在一定关系，不同的级别对应不同的数据安全级别。）</p>
-</li>
-</ol>
-<h2 id="MySQL事务隔离级别"><a href="#MySQL事务隔离级别" class="headerlink" title="MySQL事务隔离级别"></a>MySQL事务隔离级别</h2><p>SQL标准定义了4类隔离级别，包括了一些具体规则，用来限定事务内外的哪些改变是可见的，哪些是不可见的。低级别的隔离级一般支持更高的并发处理，并拥有更低的系统开销。</p>
-<ol>
-<li><p>Read Uncommitted（未提交读）：在该隔离级别，所有事务都可以看到其他未提交事务的执行结果。本隔离级别很少用于实际应用，因为它的性能也不比其他级别好多少。读取未提交的数据，也被称之为脏读（Dirty Read）。</p>
-</li>
-<li><p>Read Committed（提交读）：这是大多数数据库系统的默认隔离级别（但不是MySQL默认的）。它满足了隔离的简单定义：一个事务只能看见已经提交事务所做的改变。这种隔离级别 也支持所谓的不可重复读（Nonrepeatable Read），因为同一事务的其他实例在该实例处理其间可能会有新的commit，所以同一select可能返回不同结果。</p>
-</li>
-<li><p>Repeatable Read（可重复读）：这是MySQL的默认事务隔离级别，它确保同一事务的多个实例在并发读取数据时，会看到同样的数据行。不过理论上，这会导致另一个棘手的问题：幻读 （Phantom Read）。简单的说，幻读指当用户读取某一范围的数据行时，另一个事务又在该范围内插入了新行，当用户再读取该范围的数据行时，会发现有新的“幻影” 行。InnoDB和Falcon存储引擎通过多版本并发控制（MVCC，Multiversion Concurrency Control）机制解决了该问题。</p>
-</li>
-<li><p>Serializable（可串行化）：这是最高的隔离级别，它通过强制事务排序，使之不可能相互冲突，从而解决幻读问题。简言之，它是在每个读的数据行上加上共享锁。在这个级别，可能导致大量的超时现象和锁竞争。</p>
-</li>
-</ol>
-<h2 id="事务的并发问题"><a href="#事务的并发问题" class="headerlink" title="事务的并发问题"></a>事务的并发问题</h2><ol>
-<li><p>脏读（Dirty Read）：最容易理解。另一个事务修改了数据，但尚未提交，而本事务中的SELECT会读到这些未被提交的数据。</p>
-</li>
-<li><p>不重复读（NonRepeatable Read）：解决了脏读后，会遇到，同一个事务执行过程中，另外一个事务提交了新数据，因此本事务先后两次读到的数据结果会不一致。</p>
-</li>
-<li><p>幻读（Phantom Read）：解决了不重复读，保证了同一个事务里，查询的结果都是事务开始并且第一次查询时的状态（一致性）。但是，如果另一个事务同时提交了新数据，虽然本事务再次按照相同的条件查找会得到相同的结果集，但是本事务指定更新时(看了后面的演示你就会知道)，就会“惊奇的”发现了这些新数据，貌似之前读到的数据是“鬼影”一样的幻觉。</p>
-</li>
-</ol>
-<p>不可重复读的和幻读很容易混淆，不可重复读侧重于修改，幻读侧重于新增或删除。解决不可重复读的问题只需锁住满足条件的行，解决幻读需要锁表。</p>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">隔离级别</th>
-<th style="text-align:center">脏读<br>Dirty Read</th>
-<th style="text-align:center">不可重复读<br>NonRepeatable Read</th>
-<th>幻读<br>Phantom Read</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">未提交读<br>Read uncommitted</td>
-<td style="text-align:center">可能</td>
-<td style="text-align:center">可能</td>
-<td>可能</td>
-</tr>
-<tr>
-<td style="text-align:center">已提交读<br>Read committed</td>
-<td style="text-align:center">不可能</td>
-<td style="text-align:center">可能</td>
-<td>可能</td>
-</tr>
-<tr>
-<td style="text-align:center">可重复读<br>Repeatable read</td>
-<td style="text-align:center">不可能</td>
-<td style="text-align:center">不可能</td>
-<td>可能</td>
-</tr>
-<tr>
-<td style="text-align:center">可串行化<br>Serializable</td>
-<td style="text-align:center">不可能</td>
-<td style="text-align:center">不可能</td>
-<td>不可能</td>
-</tr>
-</tbody>
-</table>
-
+        <h3 id="Talk-is-cheap-show-you-the-code"><a href="#Talk-is-cheap-show-you-the-code" class="headerlink" title="Talk is cheap, show you the code"></a>Talk is cheap, show you the code</h3><p>为每一个 walkDir 的调用创建一个新的 goroutine。它使用 sync.WaitGroup 来为当前存活的 walkDir 调用计数，一个 goroutine 在计数器减为 0 的时候关闭 fileSizes 通道。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line">import (</span><br><span class="line">    &quot;flag&quot;</span><br><span class="line">    &quot;fmt&quot;</span><br><span class="line">    &quot;io/ioutil&quot;</span><br><span class="line">    &quot;os&quot;</span><br><span class="line">    &quot;path/filepath&quot;</span><br><span class="line">    &quot;sync&quot;</span><br><span class="line">    &quot;time&quot;</span><br><span class="line">)</span><br><span class="line">var verbose = flag.Bool(&quot;v&quot;, false, &quot;显示详细进度&quot;)</span><br><span class="line">func main() &#123;</span><br><span class="line">    // ...确定根目录...</span><br><span class="line">    flag.Parse()</span><br><span class="line">    // 确定初始目录</span><br><span class="line">    roots := flag.Args()</span><br><span class="line">    if len(roots) == 0 &#123;</span><br><span class="line">        roots = []string&#123;&quot;.&quot;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    // 并行遍历每一个文件树</span><br><span class="line">    fileSizes := make(chan int64)</span><br><span class="line">    var n sync.WaitGroup</span><br><span class="line">    for _, root := range roots &#123;</span><br><span class="line">        n.Add(1)</span><br><span class="line">        go walkDir(root, &amp;n, fileSizes)</span><br><span class="line">    &#125;</span><br><span class="line">    go func() &#123;</span><br><span class="line">        n.Wait()</span><br><span class="line">        close(fileSizes)</span><br><span class="line">    &#125;()</span><br><span class="line">    // 定期打印结果</span><br><span class="line">    var tick &lt;-chan time.Time</span><br><span class="line">    if *verbose &#123;</span><br><span class="line">        tick = time.Tick(500 * time.Millisecond)</span><br><span class="line">    &#125;</span><br><span class="line">    var nfiles, nbytes int64</span><br><span class="line">loop:</span><br><span class="line">    for &#123;</span><br><span class="line">        select &#123;</span><br><span class="line">        case size, ok := &lt;-fileSizes:</span><br><span class="line">            if !ok &#123;</span><br><span class="line">                break loop // fileSizes 关闭</span><br><span class="line">            &#125;</span><br><span class="line">            nfiles++</span><br><span class="line">            nbytes += size</span><br><span class="line">        case &lt;-tick:</span><br><span class="line">            printDiskUsage(nfiles, nbytes)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    printDiskUsage(nfiles, nbytes) // 最终总数</span><br><span class="line">&#125;</span><br><span class="line">func printDiskUsage(nfiles, nbytes int64) &#123;</span><br><span class="line">    fmt.Printf(&quot;%d files  %.1f GB\n&quot;, nfiles, float64(nbytes)/1e9)</span><br><span class="line">&#125;</span><br><span class="line">func walkDir(dir string, n *sync.WaitGroup, fileSizes chan&lt;- int64) &#123;</span><br><span class="line">    defer n.Done()</span><br><span class="line">    for _, entry := range dirents(dir) &#123;</span><br><span class="line">        if entry.IsDir() &#123;</span><br><span class="line">            n.Add(1)</span><br><span class="line">            subdir := filepath.Join(dir, entry.Name())</span><br><span class="line">            go walkDir(subdir, n, fileSizes)</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            fileSizes &lt;- entry.Size()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">// sema是一个用于限制目录并发数的计数信号量</span><br><span class="line">var sema = make(chan struct&#123;&#125;, 20)</span><br><span class="line">// dirents返回directory目录中的条目</span><br><span class="line">func dirents(dir string) []os.FileInfo &#123;</span><br><span class="line">    sema &lt;- struct&#123;&#125;&#123;&#125;        // 获取令牌</span><br><span class="line">    defer func() &#123; &lt;-sema &#125;() // 释放令牌</span><br><span class="line">    entries, err := ioutil.ReadDir(dir)</span><br><span class="line">    if err != nil &#123;</span><br><span class="line">        fmt.Fprintf(os.Stderr, &quot;du: %v\n&quot;, err)</span><br><span class="line">        return nil</span><br><span class="line">    &#125;</span><br><span class="line">    return entries</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
       
     </div>
     
@@ -419,11 +354,11 @@
       
         <div class="post-tags">
           
-            <a href="/tags/MySQL/" rel="tag"># MySQL</a>
+            <a href="/tags/golang/" rel="tag"># golang</a>
           
-            <a href="/tags/事务/" rel="tag"># 事务</a>
+            <a href="/tags/并发/" rel="tag"># 并发</a>
           
-            <a href="/tags/事务隔离级别/" rel="tag"># 事务隔离级别</a>
+            <a href="/tags/遍历目录/" rel="tag"># 遍历目录</a>
           
         </div>
       
@@ -436,8 +371,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/05/14/feature-extraction-TF-IDF/" rel="next" title="特征提取之TF-IDF算法">
-                <i class="fa fa-chevron-left"></i> 特征提取之TF-IDF算法
+              <a href="/2020/07/14/swoole-basic/" rel="next" title="Swoole精华手记">
+                <i class="fa fa-chevron-left"></i> Swoole精华手记
               </a>
             
           </div>
@@ -445,10 +380,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/05/22/feature-extraction-Word2Vec/" rel="prev" title="特征提取之词向量">
-                特征提取之词向量 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -586,7 +517,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#事务的基本要素（ACID）"><span class="nav-number">1.</span> <span class="nav-text">事务的基本要素（ACID）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL事务隔离级别"><span class="nav-number">2.</span> <span class="nav-text">MySQL事务隔离级别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事务的并发问题"><span class="nav-number">3.</span> <span class="nav-text">事务的并发问题</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Talk-is-cheap-show-you-the-code"><span class="nav-number">1.</span> <span class="nav-text">Talk is cheap, show you the code</span></a></li></ol></div>
             
 
           </div>
